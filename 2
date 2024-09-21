@@ -1,0 +1,56 @@
+n, q = map(int, input().split())
+perm = list(map(int, input().split()))
+li = list(map(int, input().split()))
+ri = list(map(int, input().split()))
+
+# 映射元素值到索引
+value_to_index = {value: idx for idx, value in enumerate(perm)}
+
+# 初始化并查集和块的信息
+parent = [i for i in range(n)]
+left = [i for i in range(n)]
+right = [i for i in range(n)]
+prev = [i - 1 for i in range(n)]
+next = [i + 1 for i in range(n)]
+next[n - 1] = -1  # 最后一个元素没有下一个块
+prev[0] = -1      # 第一个元素没有前一个块
+
+def find(u):
+    if parent[u] != u:
+        parent[u] = find(parent[u])
+    return parent[u]
+
+valid = True
+
+for i in range(q - 1, -1, -1):
+    li_value = li[i]
+    ri_value = ri[i]
+    if li_value not in value_to_index or ri_value not in value_to_index:
+        valid = False
+        break
+    idx_li = value_to_index[li_value]
+    idx_ri = value_to_index[ri_value]
+    u = find(idx_li)
+    v = find(idx_ri)
+    if u == v:
+        valid = False
+        break
+    if next[u] != v:
+        valid = False
+        break
+    # 合并块
+    parent[v] = u
+    right[u] = right[v]
+    next[u] = next[v]
+    if next[v] != -1:
+        prev[next[v]] = u
+
+if valid:
+    # 检查最终是否只有一个块
+    root = find(0)
+    for i in range(n):
+        if find(i) != root:
+            valid = False
+            break
+
+print(1 if valid else 0)
